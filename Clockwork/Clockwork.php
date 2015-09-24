@@ -17,6 +17,11 @@ use Psr\Log\LoggerInterface;
 class Clockwork implements LoggerInterface
 {
     /**
+     * Clockwork version (used for chrome extension)
+     */
+    const VERSION = '1.9';
+
+    /**
      * Array of data sources, these objects provide data to be stored in a request object
      */
     protected $dataSources = array();
@@ -94,7 +99,7 @@ class Clockwork implements LoggerInterface
     {
         foreach ($this->dataSources as $dataSource) {
             if($dataSource instanceof ExtraDataSourceInterface) {
-                $this->request[$dataSource->getKey()] = $dataSource->getData();
+                $this->request->extra[$dataSource->getKey()] = $dataSource->resolve($this->request);
             } else {
                 $dataSource->resolve($this->request);
             }

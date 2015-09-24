@@ -3,12 +3,8 @@
 /**
  * Data source interface, all data sources must implement this interface
  */
-interface ExtraDataSourceInterface
+interface ExtraDataSourceInterface extends DataSourceInterface
 {
-	/**
-	 * @return array
-	 */
-	public function getData();
 
 	/**
 	 * @return string

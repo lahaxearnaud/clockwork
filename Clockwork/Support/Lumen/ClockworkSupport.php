@@ -35,21 +35,7 @@ class ClockworkSupport
 
 	public function getStorage()
 	{
-		if ($this->getConfig('storage', 'files') == 'sql') {
-			$database = $this->getConfig('storage_sql_database', storage_path('clockwork.sqlite'));
-			$table = $this->getConfig('storage_sql_table', 'clockwork');
-
-			if ($this->app['config']->get("database.connections.{$database}")) {
-				$database = $this->app['db']->connection($database)->getPdo();
-			} else {
-				$database = "sqlite:{$database}";
-			}
-
-			$storage = new SqlStorage($database, $table);
-			$storage->initialize();
-		} else {
-			$storage = new FileStorage($this->getConfig('storage_files_path', storage_path('clockwork')));
-		}
+		$storage = new FileStorage($this->getConfig('storage_files_path', storage_path('clockwork')));
 
 		$storage->filter = $this->getFilter();
 
