@@ -1,5 +1,4 @@
-<?php
-namespace Clockwork;
+<?php namespace Clockwork;
 
 use Clockwork\DataSource\DataSourceInterface;
 use Clockwork\Request\Log;
@@ -46,6 +45,11 @@ class Clockwork implements LoggerInterface
 	protected $timeline;
 
 	/**
+	 * @var array
+	 */
+	protected $collectors;
+
+	/**
 	 * Create a new Clockwork instance with default request object
 	 */
 	public function __construct()
@@ -53,6 +57,7 @@ class Clockwork implements LoggerInterface
 		$this->request = new Request();
 		$this->log = new Log();
 		$this->timeline = new Timeline();
+		$this->collectors = [];
 	}
 
 	/**
@@ -182,47 +187,47 @@ class Clockwork implements LoggerInterface
 
 	public function log($level = LogLevel::INFO, $message, array $context = array())
 	{
-		return $this->getLog()->log($level, $message, $context);
+		$this->getLog()->log($level, $message, $context);
 	}
 
 	public function emergency($message, array $context = array())
 	{
-		return $this->getLog()->log(LogLevel::EMERGENCY, $message, $context);
+		$this->getLog()->log(LogLevel::EMERGENCY, $message, $context);
 	}
 
 	public function alert($message, array $context = array())
 	{
-		return $this->getLog()->log(LogLevel::ALERT, $message, $context);
+		$this->getLog()->log(LogLevel::ALERT, $message, $context);
 	}
 
 	public function critical($message, array $context = array())
 	{
-		return $this->getLog()->log(LogLevel::CRITICAL, $message, $context);
+		$this->getLog()->log(LogLevel::CRITICAL, $message, $context);
 	}
 
 	public function error($message, array $context = array())
 	{
-		return $this->getLog()->log(LogLevel::ERROR, $message, $context);
+		$this->getLog()->log(LogLevel::ERROR, $message, $context);
 	}
 
 	public function warning($message, array $context = array())
 	{
-		return $this->getLog()->log(LogLevel::WARNING, $message, $context);
+		$this->getLog()->log(LogLevel::WARNING, $message, $context);
 	}
 
 	public function notice($message, array $context = array())
 	{
-		return $this->getLog()->log(LogLevel::NOTICE, $message, $context);
+		$this->getLog()->log(LogLevel::NOTICE, $message, $context);
 	}
 
 	public function info($message, array $context = array())
 	{
-		return $this->getLog()->log(LogLevel::INFO, $message, $context);
+		$this->getLog()->log(LogLevel::INFO, $message, $context);
 	}
 
 	public function debug($message, array $context = array())
 	{
-		return $this->getLog()->log(LogLevel::DEBUG, $message, $context);
+		$this->getLog()->log(LogLevel::DEBUG, $message, $context);
 	}
 
 	/**
@@ -237,5 +242,22 @@ class Clockwork implements LoggerInterface
 	public function endEvent($name)
 	{
 		return $this->getTimeline()->endEvent($name);
+	}
+
+	public function getCollectors()
+	{
+		return $this->collectors;
+	}
+
+	public function getCollector($name)
+	{
+		return $this->collectors[$name];
+	}
+
+	public function addCollector($name, DataSourceInterface $datasource)
+	{
+		$this->collectors[$name] = $datasource;
+
+		return $this;
 	}
 }

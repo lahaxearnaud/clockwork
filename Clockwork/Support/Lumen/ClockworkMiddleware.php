@@ -20,7 +20,6 @@ class ClockworkMiddleware implements Middleware
 	 * Create a new middleware instance.
 	 *
 	 * @param  Application  $app
-	 * @return void
 	 */
 	public function __construct(Application $app)
 	{
