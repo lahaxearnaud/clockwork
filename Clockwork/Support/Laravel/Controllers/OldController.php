@@ -1,9 +1,9 @@
 <?php namespace Clockwork\Support\Laravel\Controllers;
 
 use Illuminate\Foundation\Application;
-use Illuminate\Routing\Controller;
+use Illuminate\Routing\Controllers\Controller;
 
-class LegacyController extends Controller {
+class OldController extends Controller {
 
 	public $app;
 

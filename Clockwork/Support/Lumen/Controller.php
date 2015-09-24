@@ -1,9 +1,9 @@
-<?php namespace Clockwork\Support\Laravel\Controllers;
+<?php namespace Clockwork\Support\Lumen;
 
-use Illuminate\Foundation\Application;
-use Illuminate\Routing\Controller;
+use Illuminate\Contracts\Foundation\Application;
+use Laravel\Lumen\Routing\Controller as LumenController;
 
-class LegacyController extends Controller {
+class Controller extends LumenController {
 
 	public $app;
 
