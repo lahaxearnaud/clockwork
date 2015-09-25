@@ -2,7 +2,6 @@
 namespace Clockwork\DataSource;
 
 use Clockwork\Request\Request;
-
 use Illuminate\Database\DatabaseManager;
 use Illuminate\Events\Dispatcher as EventDispatcher;
 use Illuminate\Support\Facades\DB;
@@ -12,6 +11,7 @@ use Illuminate\Support\Facades\DB;
  */
 class EloquentDataSource extends DataSource
 {
+
     /**
      * Database manager
      */
@@ -19,6 +19,7 @@ class EloquentDataSource extends DataSource
 
     /**
      * Internal array where queries are stored
+     *
      * @var array
      */
     protected $queries = array();
@@ -42,26 +43,27 @@ class EloquentDataSource extends DataSource
 
     /**
      * Log the query into the internal store
+     *
      * @return array
      */
     public function registerQuery($query, $bindings, $time, $connection)
     {
 
-        $pdo = DB::connection($connection)->getPdo();
+        $pdo       = DB::connection($connection)->getPdo();
         $statement = $pdo->prepare('EXPLAIN ' . $query);
         $statement->execute($bindings);
         $explainResults = $statement->fetchAll(\PDO::FETCH_CLASS);
 
-        foreach($explainResults as $key => $value) {
-            $explainResults[$key] = (array) $value;
+        foreach ($explainResults as $key => $value) {
+            $explainResults[$key] = (array)$value;
         }
 
         $this->queries[] = array(
-            'query' => $query,
-            'bindings' => $bindings,
-            'time' => $time,
+            'query'      => $query,
+            'bindings'   => $bindings,
+            'time'       => $time,
             'connection' => $connection,
-            'explain' => $explainResults
+            'explain'    => $explainResults
         );
     }
 
@@ -76,7 +78,8 @@ class EloquentDataSource extends DataSource
     }
 
     /**
-     * Takes a query, an array of bindings and the connection as arguments, returns runnable query with upper-cased keywords
+     * Takes a query, an array of bindings and the connection as arguments, returns runnable query with upper-cased
+     * keywords
      */
     protected function createRunnableQuery($query, $bindings, $connection)
     {
@@ -91,7 +94,7 @@ class EloquentDataSource extends DataSource
 
         # highlight keywords
         $keywords = array('select', 'insert', 'update', 'delete', 'where', 'from', 'limit', 'is', 'null', 'having', 'group by', 'order by', 'asc', 'desc');
-        $regexp = '/\b' . implode('\b|\b', $keywords) . '\b/i';
+        $regexp   = '/\b' . implode('\b|\b', $keywords) . '\b/i';
 
         $query = preg_replace_callback($regexp, function ($match) {
             return strtoupper($match[0]);
@@ -109,10 +112,10 @@ class EloquentDataSource extends DataSource
 
         foreach ($this->queries as $query)
             $queries[] = array(
-                'query' => $this->createRunnableQuery($query['query'], $query['bindings'], $query['connection']),
-                'duration' => $query['time'],
+                'query'      => $this->createRunnableQuery($query['query'], $query['bindings'], $query['connection']),
+                'duration'   => $query['time'],
                 'connection' => $query['connection'],
-                'explain' => $query['explain']
+                'explain'    => $query['explain']
             );
 
         return $queries;

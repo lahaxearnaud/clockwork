@@ -2,7 +2,6 @@
 namespace Clockwork\Storage;
 
 use Clockwork\Request\Request;
-use Clockwork\Storage\Storage;
 use Exception;
 
 /**
@@ -10,79 +9,80 @@ use Exception;
  */
 class FileStorage extends Storage
 {
-	/**
-	 * Path where files are stored
-	 */
-	private $path;
 
-	/**
-	 * Return new storage, takes path where to store files as argument, throws exception if path is not writable
-	 */
-	public function __construct($path)
-	{
-		if (!file_exists($path)) {
-			# directory doesn't exist, try to create one
-			if (!mkdir($path, 0700, true))
-				throw new Exception('Directory "' . $path . '" does not exist.');
+    /**
+     * Path where files are stored
+     */
+    private $path;
 
-			# create default .gitignore, to ignore stored json files
-			file_put_contents($path . '/.gitignore', "*.json\n");
-		}
+    /**
+     * Return new storage, takes path where to store files as argument, throws exception if path is not writable
+     */
+    public function __construct($path)
+    {
+        if (!file_exists($path)) {
+            # directory doesn't exist, try to create one
+            if (!mkdir($path, 0700, true))
+                throw new Exception('Directory "' . $path . '" does not exist.');
 
-		if (!is_writable($path)) 
-			throw new Exception('Path "' . $path . '" is not writable.');
+            # create default .gitignore, to ignore stored json files
+            file_put_contents($path . '/.gitignore', "*.json\n");
+        }
 
-		$this->path = $path;
-	}
+        if (!is_writable($path))
+            throw new Exception('Path "' . $path . '" is not writable.');
 
-	/**
-	 * Retrieve request specified by id argument, if second argument is specified, array of requests from id to last
-	 * will be returned
-	 */
-	public function retrieve($id = null, $last = null)
-	{
-		if ($id && !$last) {
-			if (!is_readable($this->path . '/' . $id . '.json'))
-				return null;
+        $this->path = $path;
+    }
 
-			return new Request(
-				json_decode(file_get_contents($this->path . '/' . $id . '.json'), true)
-			);
-		}
+    /**
+     * Retrieve request specified by id argument, if second argument is specified, array of requests from id to last
+     * will be returned
+     */
+    public function retrieve($id = null, $last = null)
+    {
+        if ($id && !$last) {
+            if (!is_readable($this->path . '/' . $id . '.json'))
+                return null;
 
-		$files = glob($this->path . '/*.json');
+            return new Request(
+                json_decode(file_get_contents($this->path . '/' . $id . '.json'), true)
+            );
+        }
 
-		$id = ($id) ? $id . '.json' : first($files);
-		$last = ($last) ? $last . '.json' : end($files);
+        $files = glob($this->path . '/*.json');
 
-		$requests = array();
-		$add = false;
+        $id   = ($id) ? $id . '.json' : first($files);
+        $last = ($last) ? $last . '.json' : end($files);
 
-		foreach ($files as $file) {
-			if ($file == $id)
-				$add = true;
-			elseif ($file == $last)
-				$add = false;
+        $requests = array();
+        $add      = false;
 
-			if (!$add)
-				continue;
+        foreach ($files as $file) {
+            if ($file == $id)
+                $add = true;
+            elseif ($file == $last)
+                $add = false;
 
-			$requests[] = new Request(
-				json_decode(file_get_contents($file), true)
-			);
-		}
+            if (!$add)
+                continue;
 
-		return $requests;
-	}
+            $requests[] = new Request(
+                json_decode(file_get_contents($file), true)
+            );
+        }
 
-	/**
-	 * Store request, requests are stored in JSON representation in files named <request id>.json in storage path
-	 */
-	public function store(Request $request)
-	{
-		file_put_contents(
-			$this->path . '/' . $request->id . '.json',
-			@json_encode($this->applyFilter($request->toArray()))
-		);
-	}
+        return $requests;
+    }
+
+    /**
+     * Store request, requests are stored in JSON representation in files named <request id>.json in storage path
+     */
+    public function store(Request $request)
+    {
+        file_put_contents(
+            $this->path . '/' . $request->id . '.json',
+            @json_encode($this->applyFilter($request->toArray()))
+        );
+    }
 }

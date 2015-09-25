@@ -6,81 +6,82 @@ namespace Clockwork\Request;
  */
 class Timeline
 {
-	/**
-	 * Timeline data
-	 */
-	public $data = array();
 
-	/**
-	 * Add a new event
-	 */
-	public function addEvent($name, $description, $start_time, $end_time, array $data = array())
-	{
-		$this->data[$name] = array(
-			'start'       => $start_time,
-			'end'         => $end_time,
-			'duration'    => null,
-			'description' => $description,
-			'data'        => $data,
-		);
-	}
+    /**
+     * Timeline data
+     */
+    public $data = array();
 
-	/**
-	 * Start recording a new event, expects name, description and optional time as arguments, if time is not provided,
-	 * current time will be used, if time equals 'start', request time will be used
-	 */
-	public function startEvent($name, $description, $time = null, array $data = array())
-	{
-		$this->data[$name] = array(
-			'start'       => $time ? $time : microtime(true),
-			'end'         => null,
-			'duration'    => null,
-			'description' => $description,
-			'data'        => $data,
-		);
-	}
+    /**
+     * Add a new event
+     */
+    public function addEvent($name, $description, $start_time, $end_time, array $data = array())
+    {
+        $this->data[$name] = array(
+            'start'       => $start_time,
+            'end'         => $end_time,
+            'duration'    => null,
+            'description' => $description,
+            'data'        => $data,
+        );
+    }
 
-	/**
-	 * End recording of event specified by name argument, throws exception if specified event is not found
-	 */
-	public function endEvent($name)
-	{
-		if (!isset($this->data[$name]))
-			return false;
+    /**
+     * Start recording a new event, expects name, description and optional time as arguments, if time is not provided,
+     * current time will be used, if time equals 'start', request time will be used
+     */
+    public function startEvent($name, $description, $time = null, array $data = array())
+    {
+        $this->data[$name] = array(
+            'start'       => $time ? $time : microtime(true),
+            'end'         => null,
+            'duration'    => null,
+            'description' => $description,
+            'data'        => $data,
+        );
+    }
 
-		$this->data[$name]['end'] = microtime(true);
+    /**
+     * End recording of event specified by name argument, throws exception if specified event is not found
+     */
+    public function endEvent($name)
+    {
+        if (!isset($this->data[$name]))
+            return false;
 
-		if (is_numeric($this->data[$name]['start']))
-			$this->data[$name]['duration'] = ($this->data[$name]['end'] - $this->data[$name]['start']) * 1000;
-	}
+        $this->data[$name]['end'] = microtime(true);
 
-	/**
-	 * End all unfinished events
-	 */
-	public function finalize($start = null, $end = null)
-	{
-		foreach ($this->data as &$item) {
-			if ($item['start'] == 'start' && $start)
-				$item['start'] = $start;
+        if (is_numeric($this->data[$name]['start']))
+            $this->data[$name]['duration'] = ($this->data[$name]['end'] - $this->data[$name]['start']) * 1000;
+    }
 
-			if (!$item['end'])
-				$item['end'] = $end ? $end : microtime(true);
+    /**
+     * End all unfinished events
+     */
+    public function finalize($start = null, $end = null)
+    {
+        foreach ($this->data as &$item) {
+            if ($item['start'] == 'start' && $start)
+                $item['start'] = $start;
 
-			$item['duration'] = ($item['end'] - $item['start']) * 1000;
-		}
+            if (!$item['end'])
+                $item['end'] = $end ? $end : microtime(true);
 
-		uasort($this->data, function($a, $b){
-			return $a['start'] * 1000 - $b['start'] * 1000;
-		});
+            $item['duration'] = ($item['end'] - $item['start']) * 1000;
+        }
 
-		return $this->data;
-	}
+        uasort($this->data, function ($a, $b) {
+            return $a['start'] * 1000 - $b['start'] * 1000;
+        });
 
-	/**
-	 * Return timeline data as array
-	 */
-	public function toArray()
-	{
-		return $this->data;
-	}
+        return $this->data;
+    }
+
+    /**
+     * Return timeline data as array
+     */
+    public function toArray()
+    {
+        return $this->data;
+    }
 }

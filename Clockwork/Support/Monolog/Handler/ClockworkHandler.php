@@ -2,8 +2,6 @@
 namespace Clockwork\Support\Monolog\Handler;
 
 use Clockwork\Request\Log as ClockworkLog;
-
-use Monolog\Logger;
 use Monolog\Handler\AbstractProcessingHandler;
 
 /**
@@ -11,6 +9,7 @@ use Monolog\Handler\AbstractProcessingHandler;
  */
 class ClockworkHandler extends AbstractProcessingHandler
 {
+
     protected $clockworkLog;
 
     public function __construct(ClockworkLog $clockworkLog)

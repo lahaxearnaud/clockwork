@@ -1,7 +1,6 @@
 <?php
 namespace Clockwork\Storage;
 
-use Clockwork\Storage\StorageInterface;
 use Clockwork\Request\Request;
 
 /**
@@ -9,43 +8,44 @@ use Clockwork\Request\Request;
  */
 abstract class Storage implements StorageInterface
 {
-	/**
-	 * Array of data to be filtered from stored requests
-	 */
-	public $filter = array();
 
-	/**
-	 * Same as retrieve, but json representations of requests are returned
-	 */
-	public function retrieveAsJson($id = null, $last = null)
-	{
-		$requests = $this->retrieve($id, $last);
+    /**
+     * Array of data to be filtered from stored requests
+     */
+    public $filter = array();
 
-		if (!$requests)
-			return null;
+    /**
+     * Same as retrieve, but json representations of requests are returned
+     */
+    public function retrieveAsJson($id = null, $last = null)
+    {
+        $requests = $this->retrieve($id, $last);
 
-		if (!is_array($requests))
-			return $requests->toJson();
+        if (!$requests)
+            return null;
 
-		foreach ($requests as &$request)
-			$request = $request->toArray();
+        if (!is_array($requests))
+            return $requests->toJson();
 
-		return json_encode($requests);
-	}
+        foreach ($requests as &$request)
+            $request = $request->toArray();
 
-	/**
-	 * Return array of data with applied filter
-	 */
-	protected function applyFilter(array $data)
-	{
-		$emptyRequest = new Request(array());
+        return json_encode($requests);
+    }
 
-		foreach ($this->filter as $key) {
-			if (isset($data[$key])) {
-				$data[$key] = $emptyRequest->$key;
-			}
-		}
+    /**
+     * Return array of data with applied filter
+     */
+    protected function applyFilter(array $data)
+    {
+        $emptyRequest = new Request(array());
 
-		return $data;
-	}
+        foreach ($this->filter as $key) {
+            if (isset($data[$key])) {
+                $data[$key] = $emptyRequest->$key;
+            }
+        }
+
+        return $data;
+    }
 }

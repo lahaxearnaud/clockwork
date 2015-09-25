@@ -9,6 +9,7 @@ use Psr\Log\LogLevel;
  */
 class Log extends AbstractLogger
 {
+
     /**
      * Array of log messages, with level and timestamp
      */
@@ -33,16 +34,16 @@ class Log extends AbstractLogger
 
         $this->data[] = array(
             'message' => $message,
-            'level' => $level,
-            'time' => microtime(true),
-            'stack' => $this->debug_backtrace_string()
+            'level'   => $level,
+            'time'    => microtime(true),
+            'stack'   => $this->debug_backtrace_string()
         );
     }
 
     function debug_backtrace_string()
     {
         $stack = '';
-        $i = 1;
+        $i     = 1;
         $trace = debug_backtrace();
         $trace = array_slice($trace, 4); // remove unwanted rows (clockwork...)
         foreach ($trace as $node) {
@@ -57,6 +58,7 @@ class Log extends AbstractLogger
             $stack .= $node['function'] . "()" . PHP_EOL;
             $i++;
         }
+
         return $stack;
     }
 

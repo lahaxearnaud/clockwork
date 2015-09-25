@@ -1,11 +1,11 @@
 <?php namespace Clockwork\DataSource;
 
-use Clockwork\DataSource\ExtraDataSourceInterface;
 use Clockwork\Request\Request;
 use Illuminate\Support\Facades\Config;
 
 class ConfigDataSource implements ExtraDataSourceInterface
 {
+
     /**
      * @return string
      */
@@ -21,8 +21,8 @@ class ConfigDataSource implements ExtraDataSourceInterface
     {
         $configs = Config::all();
 
-        foreach($configs['database']['connections'] as $type => $connection) {
-            if(!isset($connection['password'])) {
+        foreach ($configs['database']['connections'] as $type => $connection) {
+            if (!isset($connection['password'])) {
                 continue;
             }
 

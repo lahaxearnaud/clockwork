@@ -6,6 +6,7 @@ use Symfony\Component\Console\Input\InputOption;
 
 class ClockworkCleanCommand extends Command
 {
+
     /**
      * The console command name.
      *
@@ -51,6 +52,7 @@ class ClockworkCleanCommand extends Command
 
         if (!$files || !count($files)) {
             $this->info('Nothing to clean up.');
+
             return;
         }
 

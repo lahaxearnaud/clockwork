@@ -6,8 +6,8 @@
 interface ExtraDataSourceInterface extends DataSourceInterface
 {
 
-	/**
-	 * @return string
-	 */
-	public function getKey();
+    /**
+     * @return string
+     */
+    public function getKey();
 }

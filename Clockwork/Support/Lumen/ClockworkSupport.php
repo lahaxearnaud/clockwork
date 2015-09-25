@@ -3,116 +3,116 @@
 use Clockwork\Clockwork;
 use Clockwork\Storage\FileStorage;
 use Clockwork\Storage\SqlStorage;
-
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\JsonResponse;
 
 class ClockworkSupport
 {
-	protected $app;
 
-	public function __construct(Application $app)
-	{
-		$this->app = $app;
-	}
+    protected $app;
 
-	public function getAdditionalDataSources()
-	{
-		return $this->getConfig('additional_data_sources', array());
-	}
+    public function __construct(Application $app)
+    {
+        $this->app = $app;
+    }
 
-	public function getConfig($key, $default = null)
-	{
-		return env('CLOCKWORK_' . strtoupper($key), $default);
-	}
+    public function getAdditionalDataSources()
+    {
+        return $this->getConfig('additional_data_sources', array());
+    }
 
-	public function getData($id = null, $last = null)
-	{
-		$this->app['session.store']->reflash();
+    public function getConfig($key, $default = null)
+    {
+        return env('CLOCKWORK_' . strtoupper($key), $default);
+    }
 
-		return new JsonResponse($this->app['clockwork']->getStorage()->retrieve($id, $last));
-	}
+    public function getData($id = null, $last = null)
+    {
+        $this->app['session.store']->reflash();
 
-	public function getStorage()
-	{
-		$storage = new FileStorage($this->getConfig('storage_files_path', storage_path('clockwork')));
+        return new JsonResponse($this->app['clockwork']->getStorage()->retrieve($id, $last));
+    }
 
-		$storage->filter = $this->getFilter();
+    public function getStorage()
+    {
+        $storage = new FileStorage($this->getConfig('storage_files_path', storage_path('clockwork')));
 
-		return $storage;
-	}
+        $storage->filter = $this->getFilter();
 
-	public function getFilter()
-	{
-		return $this->getConfig('filter', array());
-	}
+        return $storage;
+    }
 
-	public function process($request, $response)
-	{
-		if (!$this->isCollectingData()) {
-			return $response; // Collecting data is disabled, return immediately
-		}
+    public function getFilter()
+    {
+        return $this->getConfig('filter', array());
+    }
 
-		// don't collect data for configured URIs
-		$request_uri = $request->getRequestUri();
-		$filter_uris = $this->getConfig('filter_uris', array());
-		$filter_uris[] = '/__clockwork/[0-9\.]+'; // don't collect data for Clockwork requests
+    public function process($request, $response)
+    {
+        if (!$this->isCollectingData()) {
+            return $response; // Collecting data is disabled, return immediately
+        }
 
-		foreach ($filter_uris as $uri) {
-			$regexp = '#' . str_replace('#', '\#', $uri) . '#';
+        // don't collect data for configured URIs
+        $request_uri   = $request->getRequestUri();
+        $filter_uris   = $this->getConfig('filter_uris', array());
+        $filter_uris[] = '/__clockwork/[0-9\.]+'; // don't collect data for Clockwork requests
 
-			if (preg_match($regexp, $request_uri)) {
-				return $response;
-			}
-		}
+        foreach ($filter_uris as $uri) {
+            $regexp = '#' . str_replace('#', '\#', $uri) . '#';
 
-		$this->app['clockwork.lumen']->setResponse($response);
+            if (preg_match($regexp, $request_uri)) {
+                return $response;
+            }
+        }
 
-		$this->app['clockwork']->resolveRequest();
-		$this->app['clockwork']->storeRequest();
+        $this->app['clockwork.lumen']->setResponse($response);
 
-		if (!$this->isEnabled()) {
-			return $response; // Clockwork is disabled, don't set the headers
-		}
+        $this->app['clockwork']->resolveRequest();
+        $this->app['clockwork']->storeRequest();
 
-		$response->headers->set('X-Clockwork-Id', $this->app['clockwork']->getRequest()->id, true);
-		$response->headers->set('X-Clockwork-Version', Clockwork::VERSION, true);
+        if (!$this->isEnabled()) {
+            return $response; // Clockwork is disabled, don't set the headers
+        }
 
-		if ($request->getBasePath()) {
-			$response->headers->set('X-Clockwork-Path', $request->getBasePath() . '/__clockwork/', true);
-		}
+        $response->headers->set('X-Clockwork-Id', $this->app['clockwork']->getRequest()->id, true);
+        $response->headers->set('X-Clockwork-Version', Clockwork::VERSION, true);
 
-		$extra_headers = $this->getConfig('headers', array());
-		foreach ($extra_headers as $header_name => $header_value) {
-			$response->headers->set('X-Clockwork-Header-' . $header_name, $header_value);
-		}
+        if ($request->getBasePath()) {
+            $response->headers->set('X-Clockwork-Path', $request->getBasePath() . '/__clockwork/', true);
+        }
 
-		return $response;
-	}
+        $extra_headers = $this->getConfig('headers', array());
+        foreach ($extra_headers as $header_name => $header_value) {
+            $response->headers->set('X-Clockwork-Header-' . $header_name, $header_value);
+        }
 
-	public function isEnabled()
-	{
-		$is_enabled = $this->getConfig('enable', null);
+        return $response;
+    }
 
-		if ($is_enabled === null) {
-			$is_enabled = env('APP_DEBUG', false);
-		}
+    public function isEnabled()
+    {
+        $is_enabled = $this->getConfig('enable', null);
 
-		return $is_enabled;
-	}
+        if ($is_enabled === null) {
+            $is_enabled = env('APP_DEBUG', false);
+        }
 
-	public function isCollectingData()
-	{
-		return $this->isEnabled() || $this->getConfig('collect_data_always', false);
-	}
+        return $is_enabled;
+    }
 
-	public function isCollectingDatabaseQueries()
-	{
-		return $this->app->bound('db') && $this->app['config']->get('database.default') && !in_array('databaseQueries', $this->getFilter());
-	}
+    public function isCollectingData()
+    {
+        return $this->isEnabled() || $this->getConfig('collect_data_always', false);
+    }
 
-	public function isCollectingEmails()
-	{
-		return $this->app->bound('mailer');
-	}
+    public function isCollectingDatabaseQueries()
+    {
+        return $this->app->bound('db') && $this->app['config']->get('database.default') && !in_array('databaseQueries', $this->getFilter());
+    }
+
+    public function isCollectingEmails()
+    {
+        return $this->app->bound('mailer');
+    }
 }

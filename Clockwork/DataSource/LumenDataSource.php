@@ -1,7 +1,6 @@
 <?php
 namespace Clockwork\DataSource;
 
-use Clockwork\DataSource\DataSource;
 use Clockwork\Request\Log;
 use Clockwork\Request\Request;
 use Clockwork\Request\Timeline;
@@ -13,207 +12,204 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class LumenDataSource extends DataSource
 {
-	/**
-	 * Laravel application from which the data is retrieved
-	 */
-	protected $app;
 
-	/**
-	 * Laravel response from which the data is retrieved
-	 */
-	protected $response;
+    /**
+     * Laravel application from which the data is retrieved
+     */
+    protected $app;
 
-	/**
-	 * Log data structure
-	 */
-	protected $log;
+    /**
+     * Laravel response from which the data is retrieved
+     */
+    protected $response;
 
-	/**
-	 * Timeline data structure
-	 */
-	protected $timeline;
+    /**
+     * Log data structure
+     */
+    protected $log;
 
-	/**
-	 * Timeline data structure for views data
-	 */
-	protected $views;
+    /**
+     * Timeline data structure
+     */
+    protected $timeline;
 
-	/**
-	 * Create a new data source, takes Laravel application instance as an argument
-	 */
-	public function __construct(Application $app)
-	{
-		$this->app = $app;
+    /**
+     * Timeline data structure for views data
+     */
+    protected $views;
 
-		$this->log = new Log();
-		$this->timeline = new Timeline();
-		$this->views = new Timeline();
-	}
+    /**
+     * Create a new data source, takes Laravel application instance as an argument
+     */
+    public function __construct(Application $app)
+    {
+        $this->app = $app;
 
-	/**
-	 * Adds request method, uri, controller, headers, response status, timeline data and log entries to the request
-	 */
-	public function resolve(Request $request)
-	{
-		$request->method         = $this->getRequestMethod();
-		$request->uri            = $this->getRequestUri();
-		$request->controller     = $this->getController();
-		$request->headers        = $this->getRequestHeaders();
-		$request->responseStatus = $this->getResponseStatus();
-		$request->routes         = $this->getRoutes();
-		$request->sessionData    = $this->getSessionData();
+        $this->log      = new Log();
+        $this->timeline = new Timeline();
+        $this->views    = new Timeline();
+    }
 
-		$request->log          = array_merge($request->log, $this->log->toArray());
-		$request->timelineData = $this->timeline->finalize($request->time);
-		$request->viewsData    = $this->views->finalize();
+    /**
+     * Adds request method, uri, controller, headers, response status, timeline data and log entries to the request
+     */
+    public function resolve(Request $request)
+    {
+        $request->method         = $this->getRequestMethod();
+        $request->uri            = $this->getRequestUri();
+        $request->controller     = $this->getController();
+        $request->headers        = $this->getRequestHeaders();
+        $request->responseStatus = $this->getResponseStatus();
+        $request->routes         = $this->getRoutes();
+        $request->sessionData    = $this->getSessionData();
 
-		return $request;
-	}
+        $request->log          = array_merge($request->log, $this->log->toArray());
+        $request->timelineData = $this->timeline->finalize($request->time);
+        $request->viewsData    = $this->views->finalize();
 
-	/**
-	 * Set a custom response instance
-	 */
-	public function setResponse(Response $response)
-	{
-		$this->response = $response;
-	}
+        return $request;
+    }
 
-	/**
-	 * Hook up callbacks for various Laravel events, providing information for timeline and log entries
-	 */
-	public function listenToEvents()
-	{
-		$timeline = $this->timeline;
+    /**
+     * Set a custom response instance
+     */
+    public function setResponse(Response $response)
+    {
+        $this->response = $response;
+    }
 
-		$timeline->startEvent('total', 'Total execution time.', 'start');
+    /**
+     * Hook up callbacks for various Laravel events, providing information for timeline and log entries
+     */
+    public function listenToEvents()
+    {
+        $timeline = $this->timeline;
 
-		$this->app['events']->listen('clockwork.controller.start', function() use($timeline)
-		{
-			$timeline->startEvent('controller', 'Controller running.');
-		});
-		$this->app['events']->listen('clockwork.controller.end', function() use($timeline)
-		{
-			$timeline->endEvent('controller');
-		});
+        $timeline->startEvent('total', 'Total execution time.', 'start');
 
-		$log = $this->log;
+        $this->app['events']->listen('clockwork.controller.start', function () use ($timeline) {
+            $timeline->startEvent('controller', 'Controller running.');
+        });
+        $this->app['events']->listen('clockwork.controller.end', function () use ($timeline) {
+            $timeline->endEvent('controller');
+        });
 
-		$this->app['events']->listen('illuminate.log', function($level, $message, $context) use($log)
-		{
-			$log->log($level, $message, $context);
-		});
+        $log = $this->log;
 
-		$views = $this->views;
-		$that = $this;
+        $this->app['events']->listen('illuminate.log', function ($level, $message, $context) use ($log) {
+            $log->log($level, $message, $context);
+        });
 
-		$this->app['events']->listen('composing:*', function($view) use($views, $that)
-		{
-			$time = microtime(true);
+        $views = $this->views;
+        $that  = $this;
 
-			$views->addEvent(
-				'view ' . $view->getName(),
-				'Rendering a view',
-				$time,
-				$time,
-				array(
-					'name' => $view->getName(),
-					'data' => $that->replaceUnserializable($view->getData())
-				)
-			);
-		});
-	}
+        $this->app['events']->listen('composing:*', function ($view) use ($views, $that) {
+            $time = microtime(true);
 
-	/**
-	 * Return a textual representation of current route's controller
-	 */
-	protected function getController()
-	{
-		$routes = $this->app->getRoutes();
+            $views->addEvent(
+                'view ' . $view->getName(),
+                'Rendering a view',
+                $time,
+                $time,
+                array(
+                    'name' => $view->getName(),
+                    'data' => $that->replaceUnserializable($view->getData())
+                )
+            );
+        });
+    }
 
-		$method = $this->getMethod();
-		$pathInfo = $this->app->getPathInfo();
+    /**
+     * Return a textual representation of current route's controller
+     */
+    protected function getController()
+    {
+        $routes = $this->app->getRoutes();
 
-		if (isset($routes[$method.$pathInfo]['action']['uses'])) {
-			$controller = $routes[$method.$pathInfo]['action']['uses'];
-		} elseif (isset($routes[$method.$pathInfo]['action'][0])) {
-			$controller = $routes[$method.$pathInfo]['action'][0];
-		} else {
-			$controller = null;
-		}
+        $method   = $this->getMethod();
+        $pathInfo = $this->app->getPathInfo();
 
-		if ($controller instanceof \Closure) {
-			$controller = 'anonymous function';
-		} elseif (is_object($controller)) {
-			$controller = 'instance of ' . get_class($controller);
-		} else if (!is_string($controller)) {
-			$controller = null;
-		}
+        if (isset($routes[$method . $pathInfo]['action']['uses'])) {
+            $controller = $routes[$method . $pathInfo]['action']['uses'];
+        } elseif (isset($routes[$method . $pathInfo]['action'][0])) {
+            $controller = $routes[$method . $pathInfo]['action'][0];
+        } else {
+            $controller = null;
+        }
 
-		return $controller;
-	}
+        if ($controller instanceof \Closure) {
+            $controller = 'anonymous function';
+        } elseif (is_object($controller)) {
+            $controller = 'instance of ' . get_class($controller);
+        } else if (!is_string($controller)) {
+            $controller = null;
+        }
 
-	/**
-	 * Return request headers
-	 */
-	protected function getRequestHeaders()
-	{
-		return $this->app['request']->headers->all();
-	}
+        return $controller;
+    }
 
-	/**
-	 * Return request method
-	 */
-	protected function getRequestMethod()
-	{
-		return $this->app['request']->getMethod();
-	}
+    /**
+     * Return request headers
+     */
+    protected function getRequestHeaders()
+    {
+        return $this->app['request']->headers->all();
+    }
 
-	/**
-	 * Return request URI
-	 */
-	protected function getRequestUri()
-	{
-		return $this->app['request']->getRequestUri();
-	}
+    /**
+     * Return request method
+     */
+    protected function getRequestMethod()
+    {
+        return $this->app['request']->getMethod();
+    }
 
-	/**
-	 * Return response status code
-	 */
-	protected function getResponseStatus()
-	{
-		return $this->response->getStatusCode();
-	}
+    /**
+     * Return request URI
+     */
+    protected function getRequestUri()
+    {
+        return $this->app['request']->getRequestUri();
+    }
 
-	/**
-	 * Return array of application routes
-	 */
-	protected function getRoutes()
-	{
-		$routesData = array();
+    /**
+     * Return response status code
+     */
+    protected function getResponseStatus()
+    {
+        return $this->response->getStatusCode();
+    }
 
-		$routes = $this->app->getRoutes();
+    /**
+     * Return array of application routes
+     */
+    protected function getRoutes()
+    {
+        $routesData = array();
 
-		foreach ($routes as $route) {
-			$routesData[] = array(
-				'method' => $route['method'],
-				'uri'    => $route['uri'],
-				'name'   => array_search($route['uri'], $this->app->namedRoutes) ?: null,
-				'action' => isset($route['action']['uses']) && is_string($route['action']['uses']) ? $route['action']['uses'] : 'anonymous function'
-			);
-		}
+        $routes = $this->app->getRoutes();
 
-		return $routesData;
-	}
+        foreach ($routes as $route) {
+            $routesData[] = array(
+                'method' => $route['method'],
+                'uri'    => $route['uri'],
+                'name'   => array_search($route['uri'], $this->app->namedRoutes) ?: null,
+                'action' => isset($route['action']['uses']) && is_string($route['action']['uses']) ? $route['action']['uses'] : 'anonymous function'
+            );
+        }
 
-	/**
-	 * Return session data (replace unserializable items, attempt to remove passwords)
-	 */
-	protected function getSessionData()
-	{
-		return $this->removePasswords(
-			$this->replaceUnserializable($this->app['session']->all())
-		);
-	}
+        return $routesData;
+    }
+
+    /**
+     * Return session data (replace unserializable items, attempt to remove passwords)
+     */
+    protected function getSessionData()
+    {
+        return $this->removePasswords(
+            $this->replaceUnserializable($this->app['session']->all())
+        );
+    }
 
     protected function getMethod()
     {

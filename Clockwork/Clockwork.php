@@ -7,15 +7,15 @@ use Clockwork\Request\Log;
 use Clockwork\Request\Request;
 use Clockwork\Request\Timeline;
 use Clockwork\Storage\StorageInterface;
-
-use Psr\Log\LogLevel;
 use Psr\Log\LoggerInterface;
+use Psr\Log\LogLevel;
 
 /**
  * Main Clockwork class
  */
 class Clockwork implements LoggerInterface
 {
+
     /**
      * Clockwork version (used for chrome extension)
      */
@@ -51,8 +51,8 @@ class Clockwork implements LoggerInterface
      */
     public function __construct()
     {
-        $this->request = new Request();
-        $this->log = new Log();
+        $this->request  = new Request();
+        $this->log      = new Log();
         $this->timeline = new Timeline();
     }
 
@@ -98,7 +98,7 @@ class Clockwork implements LoggerInterface
     public function resolveRequest()
     {
         foreach ($this->dataSources as $dataSource) {
-            if($dataSource instanceof ExtraDataSourceInterface) {
+            if ($dataSource instanceof ExtraDataSourceInterface) {
                 $this->request->extra[$dataSource->getKey()] = $dataSource->resolve($this->request);
             } else {
                 $dataSource->resolve($this->request);
@@ -106,16 +106,18 @@ class Clockwork implements LoggerInterface
         }
 
         // merge global log and timeline data with data collected from data sources
-        $this->request->log = array_merge($this->request->log, $this->log->toArray());
+        $this->request->log          = array_merge($this->request->log, $this->log->toArray());
         $this->request->timelineData = array_merge($this->request->timelineData, $this->timeline->finalize());
 
         // sort log and timeline data by time
         uasort($this->request->log, function ($a, $b) {
             if ($a['time'] == $b['time']) return 0;
+
             return $a['time'] < $b['time'] ? -1 : 1;
         });
         uasort($this->request->timelineData, function ($a, $b) {
             if ($a['start'] == $b['start']) return 0;
+
             return $a['start'] < $b['start'] ? -1 : 1;
         });
 

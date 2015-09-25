@@ -1,6 +1,5 @@
 <?php namespace Clockwork\DataSource;
 
-use Clockwork\DataSource\ExtraDataSourceInterface;
 use Clockwork\Request\Request;
 use Illuminate\Support\Facades\Event;
 
