@@ -1,19 +1,33 @@
 <?php namespace Clockwork\Support\Lumen;
 
+/******************************************************************************
+ *
+ * @package     Myo 2
+ * @copyright   © 2015 by Versusmind.
+ * All rights reserved. No part of this document may be
+ * reproduced or transmitted in any form or by any means,
+ * electronic, mechanical, photocopying, recording, or
+ * otherwise, without prior written permission of Versusmind.
+ * @link        http://www.versusmind.eu/
+ *
+ * @file        ClockWorkServiceProvider.php
+ * @author      LAHAXE Arnaud
+ * @last-edited 05/09/2015
+ * @description ClockWorkServiceProvider
+ *
+ ******************************************************************************/
 
 use Clockwork\Clockwork;
+use Clockwork\DataSource\EloquentDataSource;
+use Clockwork\DataSource\LumenDataSource;
 use Clockwork\DataSource\MonologDataSource;
 use Clockwork\DataSource\PhpDataSource;
-use Clockwork\DataSource\LumenDataSource;
-use Clockwork\DataSource\EloquentDataSource;
-use Clockwork\DataSource\SwiftDataSource;
-
-use Clockwork\Support\Lumen\ClockworkSupport;
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\ServiceProvider;
 
 class ClockworkServiceProvider extends ServiceProvider
 {
+
     public function boot()
     {
         if ($this->isRunningWithFacades() && !class_exists('Clockwork')) {
@@ -35,6 +49,7 @@ class ClockworkServiceProvider extends ServiceProvider
         if (!$this->app['clockwork.support']->isEnabled()) {
             return; // Clockwork is disabled, don't register the route
         }
+
     }
 
     public function register()
@@ -66,6 +81,11 @@ class ClockworkServiceProvider extends ServiceProvider
                 ->addDataSource(new PhpDataSource())
                 ->addDataSource(new MonologDataSource($app['log']))
                 ->addDataSource($app['clockwork.lumen']);
+
+            $extraDataProviders = $app['config']->get('profiler.extraDataProviders', []);
+            foreach ($extraDataProviders as $extraDataProvider) {
+                $clockwork->addDataSource(new $extraDataProvider);
+            }
 
             if ($app['clockwork.support']->isCollectingDatabaseQueries()) {
                 $clockwork->addDataSource($app['clockwork.eloquent']);
