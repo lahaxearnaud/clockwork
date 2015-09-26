@@ -189,10 +189,13 @@ class LumenDataSource extends DataSource
 
         $routes = $this->app->getRoutes();
 
+
         foreach ($routes as $route) {
+            $middleware = (isset($route['action']['middleware'])) ? (is_array($route['action']['middleware'])) ? join(", ", $route['action']['middleware']) : $route['action']['middleware'] : '';
             $routesData[] = array(
                 'method' => $route['method'],
                 'uri'    => $route['uri'],
+                'middleware' => $middleware,
                 'name'   => array_search($route['uri'], $this->app->namedRoutes) ?: null,
                 'action' => isset($route['action']['uses']) && is_string($route['action']['uses']) ? $route['action']['uses'] : 'anonymous function'
             );

@@ -50,7 +50,7 @@ class Log extends AbstractLogger
             if (!isset($node['file'])) {
                 continue;
             }
-
+            $node['file'] = str_replace(base_path(), '', $node['file']);
             $stack .= "#$i " . $node['file'] . "(" . $node['line'] . "): ";
             if (isset($node['class'])) {
                 $stack .= $node['class'] . "->";

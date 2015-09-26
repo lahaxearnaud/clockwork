@@ -49,13 +49,16 @@ class EloquentDataSource extends DataSource
     public function registerQuery($query, $bindings, $time, $connection)
     {
 
-        $pdo       = DB::connection($connection)->getPdo();
-        $statement = $pdo->prepare('EXPLAIN ' . $query);
-        $statement->execute($bindings);
-        $explainResults = $statement->fetchAll(\PDO::FETCH_CLASS);
+        $explainResults = [];
+        if (preg_match('/^(SELECT) /i', $query)) {
+            $pdo = DB::connection($connection)->getPdo();
+            $statement = $pdo->prepare('EXPLAIN ' . $query);
+            $statement->execute($bindings);
+            $explainResults = $statement->fetchAll(\PDO::FETCH_CLASS);
 
-        foreach ($explainResults as $key => $value) {
-            $explainResults[$key] = (array)$value;
+            foreach ($explainResults as $key => $value) {
+                $explainResults[$key] = (array)$value;
+            }
         }
 
         $this->queries[] = array(
