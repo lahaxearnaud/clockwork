@@ -1,6 +1,7 @@
 <?php
 namespace Clockwork\DataSource;
 
+use Clockwork\Clockwork;
 use Clockwork\Request\Request;
 use Illuminate\Database\DatabaseManager;
 use Illuminate\Events\Dispatcher as EventDispatcher;
@@ -48,7 +49,7 @@ class EloquentDataSource extends DataSource
      */
     public function registerQuery($query, $bindings, $time, $connection)
     {
-
+        $currentTime = microtime(true);
         $explainResults = [];
         if (preg_match('/^(SELECT) /i', $query)) {
             $pdo = DB::connection($connection)->getPdo();
@@ -68,6 +69,11 @@ class EloquentDataSource extends DataSource
             'connection' => $connection,
             'explain'    => $explainResults
         );
+
+        \Clockwork::addEvent(uniqid('query_'), 'Sql query', $currentTime - ($time / 1000), $currentTime, [
+            'query'     => $query,
+            'bindings'  => $bindings
+        ]);
     }
 
     /**

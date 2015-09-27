@@ -1,22 +1,5 @@
 <?php namespace Clockwork\Support\Lumen;
 
-/******************************************************************************
- *
- * @package     Myo 2
- * @copyright   © 2015 by Versusmind.
- * All rights reserved. No part of this document may be
- * reproduced or transmitted in any form or by any means,
- * electronic, mechanical, photocopying, recording, or
- * otherwise, without prior written permission of Versusmind.
- * @link        http://www.versusmind.eu/
- *
- * @file        ClockWorkServiceProvider.php
- * @author      LAHAXE Arnaud
- * @last-edited 05/09/2015
- * @description ClockWorkServiceProvider
- *
- ******************************************************************************/
-
 use Clockwork\Clockwork;
 use Clockwork\DataSource\EloquentDataSource;
 use Clockwork\DataSource\LumenDataSource;
@@ -35,6 +18,7 @@ class ClockworkServiceProvider extends ServiceProvider
         }
 
         if (!$this->app['clockwork.support']->isCollectingData()) {
+
             return; // Don't bother registering event listeners as we are not collecting data
         }
 
@@ -42,14 +26,39 @@ class ClockworkServiceProvider extends ServiceProvider
             $this->app['clockwork.eloquent']->listenToEvents();
         }
 
-        if ($this->app['clockwork.support']->isCollectingEmails()) {
-            $this->app->make('clockwork.swift');
-        }
-
         if (!$this->app['clockwork.support']->isEnabled()) {
             return; // Clockwork is disabled, don't register the route
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | Debug routes
+        |--------------------------------------------------------------------------
+        */
+
+        if (env('APP_DEBUG', false)) {
+                $this->app->group(['middleware' => 'cors'], function () {
+                $this->app->get('/__clockwork/{id}', ['as' => 'profiler.native', 'uses' => \Clockwork\Http\Profiler::class . '@getData']);
+                $this->app->get('api/__profiler/profiles/', ['as' => 'profiler.list', 'uses' => \Clockwork\Http\Profiler::class . '@index']);
+                $this->app->get('api/__profiler/profiles/stats', ['as' => 'profiler.stats', 'uses' => \Clockwork\Http\Profiler::class . '@stats']);
+                $this->app->get('api/__profiler/profiles/last', ['as' => 'profiler.last', 'uses' => \Clockwork\Http\Profiler::class . '@last']);
+                $this->app->get('api/__profiler/profiles/{id}', ['as' => 'profiler.show', 'uses' => \Clockwork\Http\Profiler::class . '@show']);
+            });
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Override env configuration
+        |--------------------------------------------------------------------------
+        |
+        | Disable profiler for profiler request
+        |
+        */
+        $pathInfo = \Illuminate\Support\Facades\Request::getPathInfo();
+        if(strpos($pathInfo, 'api/__profiler') > 0) {
+            putenv("CLOCKWORK_COLLECT_DATA_ALWAYS=false");
+            putenv("CLOCKWORK_ENABLE=false");
+        }
     }
 
     public function register()
@@ -60,10 +69,6 @@ class ClockworkServiceProvider extends ServiceProvider
 
         $this->app->singleton('clockwork.lumen', function ($app) {
             return new LumenDataSource($app);
-        });
-
-        $this->app->singleton('clockwork.swift', function ($app) {
-            return new SwiftDataSource($app['mailer']->getSwiftMailer());
         });
 
         $this->app->singleton('clockwork.eloquent', function ($app) {
@@ -109,7 +114,6 @@ class ClockworkServiceProvider extends ServiceProvider
         // set up aliases for all Clockwork parts so they can be resolved by the IoC container
         $this->app->alias('clockwork.support', 'Clockwork\Support\Lumen\ClockworkSupport');
         $this->app->alias('clockwork.lumen', 'Clockwork\DataSource\LumenDataSource');
-        $this->app->alias('clockwork.swift', 'Clockwork\DataSource\SwiftDataSource');
         $this->app->alias('clockwork.eloquent', 'Clockwork\DataSource\EloquentDataSource');
         $this->app->alias('clockwork', 'Clockwork\Clockwork');
 

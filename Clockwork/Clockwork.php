@@ -244,4 +244,9 @@ class Clockwork implements LoggerInterface
     {
         return $this->getTimeline()->endEvent($name);
     }
+
+    public function addEvent($name, $description, $timeStart, $timeEnd, $data = [])
+    {
+        return $this->getTimeline()->addEvent($name, $description, $timeStart, $timeEnd, $data);
+    }
 }
