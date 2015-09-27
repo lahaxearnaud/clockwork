@@ -235,9 +235,9 @@ class Clockwork implements LoggerInterface
      * Shortcut methods for the current timeline instance
      */
 
-    public function startEvent($name, $description, $time = null)
+    public function startEvent($name, $description, $time = null, $data = [])
     {
-        return $this->getTimeline()->startEvent($name, $description, $time);
+        return $this->getTimeline()->startEvent($name, $description, $time, $data);
     }
 
     public function endEvent($name)

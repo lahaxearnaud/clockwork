@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\App;
 use Laravel\Lumen\Application;
 use Monolog\Logger;
 use Symfony\Component\Finder\Finder;
@@ -9,14 +10,6 @@ use Symfony\Component\HttpFoundation\File\File;
 
 class Profiler extends Controller
 {
-
-    public $app;
-
-    public function __construct(Application $app)
-    {
-        $this->app = $app;
-    }
-
     /**
      * Legacy controller used for chrome extension
      *
@@ -26,7 +19,7 @@ class Profiler extends Controller
      */
     public function getData($id = null, $last = null)
     {
-        return $this->app['clockwork.support']->getData($id, $last);
+        return App::make('clockwork.support')->getData($id, $last);
     }
 
     /**
@@ -43,7 +36,7 @@ class Profiler extends Controller
      */
     public function index()
     {
-
+        $this->clean();
         return response()->json($this->getDataFromJson());
     }
 
@@ -217,5 +210,15 @@ class Profiler extends Controller
         }
 
         return array_reverse($results);
+    }
+
+    protected function clean()
+    {
+        $finder  = Finder::create();
+        $finder->name('*.json')->date('until 3 hours ago');
+        /** @var File $file */
+        foreach ($finder->in(storage_path('clockwork')) as $file) {
+            unlink($file->getRealPath());
+        }
     }
 }
