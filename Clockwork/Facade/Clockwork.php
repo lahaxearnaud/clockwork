@@ -1,9 +1,9 @@
 <?php
-namespace Clockwork\Support\Lumen;
+namespace Clockwork\Facade;
 
 use Illuminate\Support\Facades\Facade as IlluminateFacade;
 
-class Facade extends IlluminateFacade
+class Clockwork extends IlluminateFacade
 {
 
     protected static function getFacadeAccessor()

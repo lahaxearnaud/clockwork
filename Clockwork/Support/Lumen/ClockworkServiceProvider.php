@@ -14,7 +14,7 @@ class ClockworkServiceProvider extends ServiceProvider
     public function boot()
     {
         if ($this->isRunningWithFacades() && !class_exists('Clockwork')) {
-            class_alias('Clockwork\Support\Lumen\Facade', 'Clockwork');
+            class_alias('Clockwork\Facade\Clockwork', 'Clockwork');
         }
 
         if (!$this->app['clockwork.support']->isCollectingData()) {
