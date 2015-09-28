@@ -21,9 +21,9 @@ class FrameworkDataSource implements ExtraDataSourceInterface
     public function resolve(Request $request)
     {
         return [
-            'version'      => App::version(),
+            //'version'      => App::version(),
             'environment'  => App::environment(),
-            'locale'       => App::getLocale(),
+            //'locale'       => App::getLocale(),
         ];
     }
 }
