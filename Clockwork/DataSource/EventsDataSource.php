@@ -1,5 +1,6 @@
 <?php namespace Clockwork\DataSource;
 
+use Clockwork\Facade\Clockwork;
 use Clockwork\Request\Request;
 use Illuminate\Support\Facades\Event;
 
@@ -21,6 +22,9 @@ class EventsDataSource implements ExtraDataSourceInterface
                 'param' => json_encode($param),
                 'time'  => microtime(true)
             ];
+
+            $currentTime = microtime(true);
+            Clockwork::addEvent(uniqid('event_'), Event::firing(), $currentTime, $currentTime);
         });
     }
 
