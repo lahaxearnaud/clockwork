@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
+use Clockwork\Clockwork;
+use Clockwork\Storage\FileStorage;
 use Illuminate\Support\Facades\App;
 use Laravel\Lumen\Application;
 use Monolog\Logger;
@@ -10,6 +12,18 @@ use Symfony\Component\HttpFoundation\File\File;
 
 class Profiler extends Controller
 {
+
+    /**
+     * @var FileStorage
+     */
+    protected $storage;
+
+    public function __construct(FileStorage $storage)
+    {
+        $this->storage = $storage;
+    }
+
+
     /**
      * Legacy controller used for chrome extension
      *
@@ -85,14 +99,9 @@ class Profiler extends Controller
      */
     public function show($id)
     {
-        $filename = storage_path('clockwork/' . $id . '.json');
-        if (!is_file($filename)) {
-            return response()->json([], 404);
-        }
+        $profile = $this->storage->retrieve($id);
 
-        $profile = json_decode(file_get_contents($filename));
-
-        if (is_bool($profile)) {
+        if (is_null($profile)) {
             return response()->json([], 503);
         }
 
@@ -102,22 +111,22 @@ class Profiler extends Controller
         $profile->duration     = floor($profile->responseDuration);
         $profile->nbSqlQueries = count($profile->databaseQueries);
 
-        $start = $profile->timelineData->total->start;
+        $start = $profile->timelineData['total']['start'];
 
         foreach ($profile->timelineData as $key => $item) {
-            $profile->timelineData->{$key}->start    = floor(($item->start - $start) * 1000);
-            $profile->timelineData->{$key}->end      = floor(($item->end - $start) * 1000);
-            $profile->timelineData->{$key}->duration = floor($item->duration);
+            $profile->timelineData[$key]['start'] = floor(($item['start'] - $start) * 1000);
+            $profile->timelineData[$key]['end'] = floor(($item['end'] - $start) * 1000);
+            $profile->timelineData[$key]['duration'] = floor($item['duration']);
         }
 
         foreach ($profile->log as $key => $item) {
-            $profile->log[$key]->time = floor(($profile->log[$key]->time - $start) * 1000);
+            $profile->log[$key]['time'] = floor(($profile->log[$key]['time'] - $start) * 1000);
             // log from monolog use number instread of string
-            if (is_numeric($profile->log[$key]->level)) {
-                $profile->log[$key]->level = Logger::getLevelName($profile->log[$key]->level);
+            if (is_numeric($profile->log[$key]['level'])) {
+                $profile->log[$key]['level'] = Logger::getLevelName($profile->log[$key]['level']);
             }
 
-            $profile->log[$key]->level = strtoupper($profile->log[$key]->level);
+            $profile->log[$key]['level'] = strtoupper($profile->log[$key]['level']);
         }
 
         return response()->json($profile);
@@ -218,7 +227,7 @@ class Profiler extends Controller
         $finder->name('*.json')->date('until 3 hours ago');
         /** @var File $file */
         foreach ($finder->in(storage_path('clockwork')) as $file) {
-            unlink($file->getRealPath());
+            $this->storage->delete($file->getBasename('.json'));
         }
     }
 }

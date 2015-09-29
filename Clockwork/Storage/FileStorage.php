@@ -18,8 +18,10 @@ class FileStorage extends Storage
     /**
      * Return new storage, takes path where to store files as argument, throws exception if path is not writable
      */
-    public function __construct($path)
+    public function __construct()
     {
+        $path = storage_path('clockwork');
+
         if (!file_exists($path)) {
             # directory doesn't exist, try to create one
             if (!mkdir($path, 0700, true))
@@ -84,5 +86,45 @@ class FileStorage extends Storage
             $this->path . '/' . $request->id . '.json',
             @json_encode($this->applyFilter($request->toArray()))
         );
+    }
+
+    /**
+     * Store request
+     */
+    public function storePatch(Request $request, $patch)
+    {
+        $patchDir = $this->path . DIRECTORY_SEPARATOR . $request->id;
+
+        if (!is_dir($patchDir)) {
+           mkdir($patchDir);
+        }
+
+        file_put_contents(
+            $patchDir . '/patch-' . microtime(true) . '.json',
+            @json_encode($patch)
+        );
+    }
+
+    /**
+     * @param $id
+     * @return mixed
+     */
+    public function delete($id)
+    {
+        $patchDir = $this->path . DIRECTORY_SEPARATOR . $id;
+
+        if(is_dir($patchDir)) {
+            $files = glob($patchDir . '/*.json');
+            foreach ($files as $file) {
+                unlink($file);
+            }
+        }
+
+        rmdir($patchDir);
+
+        $baseJsonPath = $this->path . '/' . $id . '.json';
+        if(is_file($baseJsonPath)) {
+            unlink($baseJsonPath);
+        }
     }
 }
