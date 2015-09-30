@@ -32,8 +32,6 @@ class ClockworkServiceProvider extends ServiceProvider
             return; // Clockwork is disabled, don't register the route
         }
 
-        Event::subscribe(Handler::class);
-
         /*
         |--------------------------------------------------------------------------
         | Debug routes
@@ -120,6 +118,9 @@ class ClockworkServiceProvider extends ServiceProvider
         $this->app->alias('clockwork.lumen', 'Clockwork\DataSource\LumenDataSource');
         $this->app->alias('clockwork.eloquent', 'Clockwork\DataSource\EloquentDataSource');
         $this->app->alias('clockwork', 'Clockwork\Clockwork');
+
+        Event::subscribe(new Handler($this->app['clockwork']->getRequest(), $this->app['clockwork']->getStorage()));
+
 
         $this->registerCommands();
     }

@@ -34,7 +34,7 @@ class ClockworkHandler extends AbstractProcessingHandler
             'message' => $message,
             'level'   => $record['level'],
             'time'    => microtime(true),
-            'stack'   => $this->debugBacktraceDtring()
+            'stack'   => $this->debugBacktraceString()
         ]));
     }
 

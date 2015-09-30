@@ -24,11 +24,6 @@ class LumenDataSource extends DataSource implements InitialDataSourceInterface
     protected $response;
 
     /**
-     * Log data structure
-     */
-    protected $log;
-
-    /**
      * Timeline data structure
      */
     protected $timeline;
@@ -45,7 +40,6 @@ class LumenDataSource extends DataSource implements InitialDataSourceInterface
     {
         $this->app = $app;
 
-        $this->log      = new Log();
         $this->timeline = new Timeline();
         $this->views    = new Timeline();
     }
@@ -63,8 +57,6 @@ class LumenDataSource extends DataSource implements InitialDataSourceInterface
         $request->routes         = $this->getRoutes();
         $request->sessionData    = $this->getSessionData();
 
-        $request->log          = array_merge($request->log, $this->log->toArray());
-        $request->timelineData = $this->timeline->finalize($request->time);
         $request->viewsData    = $this->views->finalize();
 
         return $request;
@@ -94,11 +86,6 @@ class LumenDataSource extends DataSource implements InitialDataSourceInterface
             $timeline->endEvent('controller');
         });
 
-        $log = $this->log;
-
-        $this->app['events']->listen('illuminate.log', function ($level, $message, $context) use ($log) {
-            $log->log($level, $message, $context);
-        });
 
         $views = $this->views;
         $that  = $this;
