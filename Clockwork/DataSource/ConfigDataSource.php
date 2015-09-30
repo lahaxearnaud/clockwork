@@ -3,7 +3,7 @@
 use Clockwork\Request\Request;
 use Illuminate\Support\Facades\Config;
 
-class ConfigDataSource implements ExtraDataSourceInterface
+class ConfigDataSource implements ExtraDataSourceInterface, InitialDataSourceInterface
 {
 
     /**

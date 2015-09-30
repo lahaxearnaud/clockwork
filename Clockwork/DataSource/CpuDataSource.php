@@ -3,7 +3,7 @@
 use Clockwork\Request\Request;
 use Illuminate\Support\Facades\Event;
 
-class CpuDataSource implements ExtraDataSourceInterface
+class CpuDataSource implements ExtraDataSourceInterface, FinalDataSourceInterface
 {
 
     protected $initialCpuUsage;

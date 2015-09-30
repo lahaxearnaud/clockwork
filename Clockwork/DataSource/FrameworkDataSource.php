@@ -4,7 +4,7 @@ use Clockwork\Request\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Config;
 
-class FrameworkDataSource implements ExtraDataSourceInterface
+class FrameworkDataSource implements ExtraDataSourceInterface, InitialDataSourceInterface
 {
 
     /**

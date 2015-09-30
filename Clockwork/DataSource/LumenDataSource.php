@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * Data source for Lumen framework, provides application log, timeline, request and response information
  */
-class LumenDataSource extends DataSource
+class LumenDataSource extends DataSource implements InitialDataSourceInterface
 {
 
     /**

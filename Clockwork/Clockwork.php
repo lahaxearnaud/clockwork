@@ -3,17 +3,14 @@ namespace Clockwork;
 
 use Clockwork\DataSource\DataSourceInterface;
 use Clockwork\DataSource\ExtraDataSourceInterface;
-use Clockwork\Request\Log;
 use Clockwork\Request\Request;
 use Clockwork\Request\Timeline;
 use Clockwork\Storage\StorageInterface;
-use Psr\Log\LoggerInterface;
-use Psr\Log\LogLevel;
 
 /**
  * Main Clockwork class
  */
-class Clockwork implements LoggerInterface
+class Clockwork
 {
 
     /**
@@ -52,7 +49,6 @@ class Clockwork implements LoggerInterface
     public function __construct()
     {
         $this->request  = new Request();
-        $this->log      = new Log();
         $this->timeline = new Timeline();
     }
 
@@ -105,22 +101,6 @@ class Clockwork implements LoggerInterface
             }
         }
 
-        // merge global log and timeline data with data collected from data sources
-        $this->request->log          = array_merge($this->request->log, $this->log->toArray());
-        $this->request->timelineData = array_merge($this->request->timelineData, $this->timeline->finalize());
-
-        // sort log and timeline data by time
-        uasort($this->request->log, function ($a, $b) {
-            if ($a['time'] == $b['time']) return 0;
-
-            return $a['time'] < $b['time'] ? -1 : 1;
-        });
-        uasort($this->request->timelineData, function ($a, $b) {
-            if ($a['start'] == $b['start']) return 0;
-
-            return $a['start'] < $b['start'] ? -1 : 1;
-        });
-
         return $this;
     }
 
@@ -151,22 +131,6 @@ class Clockwork implements LoggerInterface
     }
 
     /**
-     * Return the log instance
-     */
-    public function getLog()
-    {
-        return $this->log;
-    }
-
-    /**
-     * Set a custom log instance
-     */
-    public function setLog(Log $log)
-    {
-        $this->log = $log;
-    }
-
-    /**
      * Return the timeline instance
      */
     public function getTimeline()
@@ -183,70 +147,21 @@ class Clockwork implements LoggerInterface
     }
 
     /**
-     * Shortcut methods for the current log instance
-     */
-
-    public function log($level = LogLevel::INFO, $message, array $context = array())
-    {
-        return $this->getLog()->log($level, $message, $context);
-    }
-
-    public function emergency($message, array $context = array())
-    {
-        return $this->getLog()->log(LogLevel::EMERGENCY, $message, $context);
-    }
-
-    public function alert($message, array $context = array())
-    {
-        return $this->getLog()->log(LogLevel::ALERT, $message, $context);
-    }
-
-    public function critical($message, array $context = array())
-    {
-        return $this->getLog()->log(LogLevel::CRITICAL, $message, $context);
-    }
-
-    public function error($message, array $context = array())
-    {
-        return $this->getLog()->log(LogLevel::ERROR, $message, $context);
-    }
-
-    public function warning($message, array $context = array())
-    {
-        return $this->getLog()->log(LogLevel::WARNING, $message, $context);
-    }
-
-    public function notice($message, array $context = array())
-    {
-        return $this->getLog()->log(LogLevel::NOTICE, $message, $context);
-    }
-
-    public function info($message, array $context = array())
-    {
-        return $this->getLog()->log(LogLevel::INFO, $message, $context);
-    }
-
-    public function debug($message, array $context = array())
-    {
-        return $this->getLog()->log(LogLevel::DEBUG, $message, $context);
-    }
-
-    /**
      * Shortcut methods for the current timeline instance
      */
 
     public function startEvent($name, $description, $time = null, $data = [])
     {
-        return $this->getTimeline()->startEvent($name, $description, $time, $data);
+        $this->getTimeline()->startEvent($name, $description, $time, $data);
     }
 
     public function endEvent($name)
     {
-        return $this->getTimeline()->endEvent($name);
+        $this->getTimeline()->endEvent($name);
     }
 
     public function addEvent($name, $description, $timeStart, $timeEnd, $data = [])
     {
-        return $this->getTimeline()->addEvent($name, $description, $timeStart, $timeEnd, $data);
+        $this->getTimeline()->addEvent($name, $description, $timeStart, $timeEnd, $data);
     }
 }

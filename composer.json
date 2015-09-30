@@ -18,7 +18,8 @@
   ],
   "require": {
     "php": ">=5.3.9",
-    "psr/log": "1.*"
+    "psr/log": "1.*",
+    "php-jsonpatch/php-jsonpatch": "1.2.*"
   },
   "autoload": {
     "psr-0": {

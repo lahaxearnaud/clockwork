@@ -38,6 +38,39 @@ class FileStorage extends Storage
     }
 
     /**
+     * @author LAHAXE Arnaud
+     *
+     * @param $id
+     *
+     * @return \Clockwork\Request\Request|null
+     */
+    public function get($id)
+    {
+        if (!is_readable($this->path . '/' . $id . '.json')) {
+            return null;
+        }
+
+        $data = file_get_contents($this->path . '/' . $id . '.json');
+
+        if (is_bool($data)) {
+            return null;
+        }
+
+        $patchDir = $this->path . DIRECTORY_SEPARATOR . $id;
+
+        $files = glob($patchDir . '/patch-*.json');
+        foreach ($files as $file) {
+            $patch = file_get_contents($file);
+            $data  = $this->applyPatch($data, $patch);
+        }
+
+        file_put_contents($this->path . '/' . $id . '.json', $data);
+        $this->deletePatches($id);
+
+        return new Request(json_encode($data));
+    }
+
+    /**
      * Retrieve request specified by id argument, if second argument is specified, array of requests from id to last
      * will be returned
      */
@@ -96,7 +129,7 @@ class FileStorage extends Storage
         $patchDir = $this->path . DIRECTORY_SEPARATOR . $request->id;
 
         if (!is_dir($patchDir)) {
-           mkdir($patchDir);
+            mkdir($patchDir);
         }
 
         file_put_contents(
@@ -107,13 +140,28 @@ class FileStorage extends Storage
 
     /**
      * @param $id
+     *
      * @return mixed
      */
     public function delete($id)
     {
+        $baseJsonPath = $this->path . '/' . $id . '.json';
+        if (is_file($baseJsonPath)) {
+            unlink($baseJsonPath);
+        }
+    }
+
+    /**
+     * @author LAHAXE Arnaud
+     *
+     * @param $id
+     *
+     */
+    public function deletePatches($id)
+    {
         $patchDir = $this->path . DIRECTORY_SEPARATOR . $id;
 
-        if(is_dir($patchDir)) {
+        if (is_dir($patchDir)) {
             $files = glob($patchDir . '/*.json');
             foreach ($files as $file) {
                 unlink($file);
@@ -121,10 +169,5 @@ class FileStorage extends Storage
         }
 
         rmdir($patchDir);
-
-        $baseJsonPath = $this->path . '/' . $id . '.json';
-        if(is_file($baseJsonPath)) {
-            unlink($baseJsonPath);
-        }
     }
 }

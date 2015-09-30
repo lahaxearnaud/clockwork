@@ -3,7 +3,7 @@
 use Clockwork\Request\Request;
 use Illuminate\Support\Facades\Event;
 
-class MemoryDataSource implements ExtraDataSourceInterface
+class MemoryDataSource implements ExtraDataSourceInterface, LiveDataSourceInterface
 {
 
     protected $points;

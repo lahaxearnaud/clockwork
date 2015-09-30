@@ -4,7 +4,7 @@ use App\User;
 use Clockwork\Request\Request;
 use Illuminate\Support\Facades\Auth;
 
-class AuthDataSource implements ExtraDataSourceInterface
+class AuthDataSource implements ExtraDataSourceInterface, FinalDataSourceInterface, InitialDataSourceInterface
 {
 
     /**

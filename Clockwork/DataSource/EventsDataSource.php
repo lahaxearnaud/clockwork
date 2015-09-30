@@ -4,11 +4,8 @@ use Clockwork\Facade\Clockwork;
 use Clockwork\Request\Request;
 use Illuminate\Support\Facades\Event;
 
-class EventsDataSource implements ExtraDataSourceInterface
+class EventsDataSource implements ExtraDataSourceInterface, LiveDataSourceInterface
 {
-
-    protected $events;
-
     /**
      * EventsDataSource constructor.
      */
@@ -17,13 +14,14 @@ class EventsDataSource implements ExtraDataSourceInterface
         $this->events = [];
 
         Event::listen('*', function ($param) {
-            $this->events [] = [
+            $currentTime = microtime(true);
+
+            Event::fire(new \Clockwork\Support\JsonPatch\Event('add', 'extra/events/-', [
                 'name'  => Event::firing(),
                 'param' => json_encode($param),
-                'time'  => microtime(true)
-            ];
+                'time'  => $currentTime
+            ]));
 
-            $currentTime = microtime(true);
             Clockwork::addEvent(uniqid('event_'), Event::firing(), $currentTime, $currentTime);
         });
     }

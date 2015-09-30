@@ -6,7 +6,7 @@ use Clockwork\Request\Request;
 /**
  * Data source providing data obtainable from plain PHP
  */
-class PhpDataSource extends DataSource
+class PhpDataSource extends DataSource implements FinalDataSourceInterface
 {
 
     /**

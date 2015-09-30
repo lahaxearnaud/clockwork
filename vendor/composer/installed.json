@@ -1,0 +1,146 @@
+[
+    {
+        "name": "psr/log",
+        "version": "1.0.0",
+        "version_normalized": "1.0.0.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/php-fig/log.git",
+            "reference": "fe0936ee26643249e916849d48e3a51d5f5e278b"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/php-fig/log/zipball/fe0936ee26643249e916849d48e3a51d5f5e278b",
+            "reference": "fe0936ee26643249e916849d48e3a51d5f5e278b",
+            "shasum": ""
+        },
+        "time": "2012-12-21 11:40:51",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "psr-0": {
+                "Psr\\Log\\": ""
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "PHP-FIG",
+                "homepage": "http://www.php-fig.org/"
+            }
+        ],
+        "description": "Common interface for logging libraries",
+        "keywords": [
+            "log",
+            "psr",
+            "psr-3"
+        ]
+    },
+    {
+        "name": "php-jsonpointer/php-jsonpointer",
+        "version": "v1.1.0",
+        "version_normalized": "1.1.0.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/raphaelstolt/php-jsonpointer.git",
+            "reference": "e79ac0e91752b74d1535aa95becc33c6f7e01a82"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/raphaelstolt/php-jsonpointer/zipball/e79ac0e91752b74d1535aa95becc33c6f7e01a82",
+            "reference": "e79ac0e91752b74d1535aa95becc33c6f7e01a82",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=5.3.0"
+        },
+        "time": "2015-05-20 23:07:34",
+        "type": "library",
+        "extra": {
+            "branch-alias": {
+                "dev-master": "1.1.x-dev"
+            }
+        },
+        "installation-source": "dist",
+        "autoload": {
+            "psr-0": {
+                "Rs\\Json": "src/"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Raphael Stolt",
+                "email": "raphael.stolt@gmail.com",
+                "homepage": "http://raphaelstolt.blogspot.com/"
+            }
+        ],
+        "description": "Implementation of JSON Pointer (http://tools.ietf.org/html/rfc6901)",
+        "homepage": "https://github.com/raphaelstolt/php-jsonpointer",
+        "keywords": [
+            "json",
+            "json pointer",
+            "json traversal"
+        ]
+    },
+    {
+        "name": "php-jsonpatch/php-jsonpatch",
+        "version": "v1.2.2",
+        "version_normalized": "1.2.2.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/raphaelstolt/php-jsonpatch.git",
+            "reference": "e57b7e02224d0266d5f7de970964b5302501125b"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/raphaelstolt/php-jsonpatch/zipball/e57b7e02224d0266d5f7de970964b5302501125b",
+            "reference": "e57b7e02224d0266d5f7de970964b5302501125b",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=5.3.0",
+            "php-jsonpointer/php-jsonpointer": "1.1.*"
+        },
+        "require-dev": {
+            "phpunit/phpunit": "4.6.*"
+        },
+        "time": "2015-08-21 07:54:03",
+        "type": "library",
+        "extra": {
+            "branch-alias": {
+                "dev-master": "1.2.x-dev"
+            }
+        },
+        "installation-source": "dist",
+        "autoload": {
+            "psr-0": {
+                "Rs\\Json": "src/"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Raphael Stolt",
+                "email": "raphael.stolt@gmail.com",
+                "homepage": "http://raphaelstolt.blogspot.com"
+            }
+        ],
+        "description": "Implementation of JSON Patch (http://tools.ietf.org/html/rfc6902)",
+        "homepage": "https://github.com/raphaelstolt/php-jsonpatch",
+        "keywords": [
+            "json",
+            "json modification",
+            "json patch"
+        ]
+    }
+]

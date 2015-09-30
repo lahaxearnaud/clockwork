@@ -5,6 +5,8 @@ use Clockwork\DataSource\EloquentDataSource;
 use Clockwork\DataSource\LumenDataSource;
 use Clockwork\DataSource\MonologDataSource;
 use Clockwork\DataSource\PhpDataSource;
+use Clockwork\Support\JsonPatch\Handler;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\ServiceProvider;
 
@@ -29,6 +31,8 @@ class ClockworkServiceProvider extends ServiceProvider
         if (!$this->app['clockwork.support']->isEnabled()) {
             return; // Clockwork is disabled, don't register the route
         }
+
+        Event::subscribe(Handler::class);
 
         /*
         |--------------------------------------------------------------------------

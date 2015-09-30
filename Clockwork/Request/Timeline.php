@@ -1,8 +1,15 @@
 <?php
 namespace Clockwork\Request;
 
+use Illuminate\Support\Facades\Event;
+
 /**
- * Data structure for application timeline, used to generate graph of application in client app
+ * Class Timeline
+ *
+ *
+ *
+ * @package Clockwork\Request
+ * @author  LAHAXE Arnaud
  */
 class Timeline
 {
@@ -13,22 +20,34 @@ class Timeline
     public $data = array();
 
     /**
-     * Add a new event
+     * @author LAHAXE Arnaud
+     *
+     * @param       $name
+     * @param       $description
+     * @param       $start_time
+     * @param       $end_time
+     * @param array $data
+     *
      */
     public function addEvent($name, $description, $start_time, $end_time, array $data = array())
     {
-        $this->data[$name] = array(
+        Event::fire(new \Clockwork\Support\JsonPatch\Event('add', 'timelineData/-', [
             'start'       => $start_time,
             'end'         => $end_time,
             'duration'    => null,
             'description' => $description,
             'data'        => $data,
-        );
+        ]));
     }
 
     /**
-     * Start recording a new event, expects name, description and optional time as arguments, if time is not provided,
-     * current time will be used, if time equals 'start', request time will be used
+     * @author LAHAXE Arnaud
+     *
+     * @param       $name
+     * @param       $description
+     * @param null  $time
+     * @param array $data
+     *
      */
     public function startEvent($name, $description, $time = null, array $data = array())
     {
@@ -42,7 +61,11 @@ class Timeline
     }
 
     /**
-     * End recording of event specified by name argument, throws exception if specified event is not found
+     * @author LAHAXE Arnaud
+     *
+     * @param $name
+     *
+     * @return bool
      */
     public function endEvent($name)
     {
@@ -51,37 +74,14 @@ class Timeline
 
         $this->data[$name]['end'] = microtime(true);
 
-        if (is_numeric($this->data[$name]['start']))
+        if (is_numeric($this->data[$name]['start'])) {
             $this->data[$name]['duration'] = ($this->data[$name]['end'] - $this->data[$name]['start']) * 1000;
-    }
-
-    /**
-     * End all unfinished events
-     */
-    public function finalize($start = null, $end = null)
-    {
-        foreach ($this->data as &$item) {
-            if ($item['start'] == 'start' && $start)
-                $item['start'] = $start;
-
-            if (!$item['end'])
-                $item['end'] = $end ? $end : microtime(true);
-
-            $item['duration'] = ($item['end'] - $item['start']) * 1000;
         }
 
-        uasort($this->data, function ($a, $b) {
-            return $a['start'] * 1000 - $b['start'] * 1000;
-        });
+        Event::fire(new \Clockwork\Support\JsonPatch\Event('add', 'timelineData/-', $this->data[$name]));
 
-        return $this->data;
-    }
+        unset($this->data[$name]);
 
-    /**
-     * Return timeline data as array
-     */
-    public function toArray()
-    {
-        return $this->data;
+        return true;
     }
 }

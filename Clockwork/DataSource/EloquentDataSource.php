@@ -1,16 +1,17 @@
 <?php
 namespace Clockwork\DataSource;
 
-use Clockwork\Clockwork;
+use Clockwork\Facade\Clockwork;
 use Clockwork\Request\Request;
 use Illuminate\Database\DatabaseManager;
 use Illuminate\Events\Dispatcher as EventDispatcher;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 
 /**
  * Data source for Eloquent (Laravel 4 ORM), provides database queries
  */
-class EloquentDataSource extends DataSource
+class EloquentDataSource extends DataSource implements LiveDataSourceInterface
 {
 
     /**
@@ -62,15 +63,15 @@ class EloquentDataSource extends DataSource
             }
         }
 
-        $this->queries[] = array(
+        Event::fire(new \Clockwork\Support\JsonPatch\Event('add', 'extra/events/-', [
             'query'      => $query,
             'bindings'   => $bindings,
             'time'       => $time,
             'connection' => $connection,
             'explain'    => $explainResults
-        );
+        ]));
 
-        \Clockwork::addEvent(uniqid('query_'), 'Sql query', $currentTime - ($time / 1000), $currentTime, [
+        Clockwork::addEvent(uniqid('query_'), 'Sql query', $currentTime - ($time / 1000), $currentTime, [
             'query'     => $query,
             'bindings'  => $bindings
         ]);
@@ -110,23 +111,5 @@ class EloquentDataSource extends DataSource
         }, $query);
 
         return $query;
-    }
-
-    /**
-     * Returns an array of runnable queries and their durations from the internal array
-     */
-    protected function getDatabaseQueries()
-    {
-        $queries = array();
-
-        foreach ($this->queries as $query)
-            $queries[] = array(
-                'query'      => $this->createRunnableQuery($query['query'], $query['bindings'], $query['connection']),
-                'duration'   => $query['time'],
-                'connection' => $query['connection'],
-                'explain'    => $query['explain']
-            );
-
-        return $queries;
     }
 }
