@@ -96,10 +96,6 @@ class ClockworkServiceProvider extends ServiceProvider
                 $clockwork->addDataSource($app['clockwork.eloquent']);
             }
 
-            if ($app['clockwork.support']->isCollectingEmails()) {
-                $clockwork->addDataSource($app['clockwork.swift']);
-            }
-
             foreach ($app['clockwork.support']->getAdditionalDataSources() as $name => $callable) {
                 $clockwork->addDataSource($app[$name]);
             }
