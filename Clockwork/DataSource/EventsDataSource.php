@@ -17,6 +17,11 @@ class EventsDataSource implements ExtraDataSourceInterface
         $this->events = [];
 
         Event::listen('*', function ($param) {
+            /** @todo fix that shit */
+            if(!class_exists('events')) {
+                return;
+            }
+            
             $this->events [] = [
                 'name'  => Event::firing(),
                 'param' => json_encode($param),
