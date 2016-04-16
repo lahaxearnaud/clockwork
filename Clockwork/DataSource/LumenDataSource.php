@@ -4,7 +4,7 @@ namespace Clockwork\DataSource;
 use Clockwork\Request\Log;
 use Clockwork\Request\Request;
 use Clockwork\Request\Timeline;
-use Illuminate\Contracts\Foundation\Application;
+use use Laravel\Lumen\Application;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
