@@ -3,7 +3,7 @@
 use Clockwork\Clockwork;
 use Clockwork\Storage\FileStorage;
 use Clockwork\Storage\SqlStorage;
-use Illuminate\Contracts\Foundation\Application;
+use Laravel\Lumen\Application;
 use Illuminate\Http\JsonResponse;
 
 class ClockworkSupport
